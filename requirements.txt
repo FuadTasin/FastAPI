@@ -1,0 +1,8 @@
+#FastApi
+fastapi
+
+#Uvicorn
+uvicorn
+
+#Pydantic
+pydantic
