@@ -20,3 +20,11 @@ def about():
 def view_students():
     data=load_data()
     return data
+
+@app.get("/view/{student_id}")
+def view_student_by_id(student_id:str=Path(...,description="Student Id of the student",example="S001")):
+    data=load_data()
+    if student_id in data:
+        return data[student_id]
+    else:
+        return HTTPException(status_code=404,detail="Student not found.")
