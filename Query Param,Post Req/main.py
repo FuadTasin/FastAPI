@@ -58,6 +58,6 @@ def create_student(student:dict=Body()):
     student_id=student["id"]
     data[student_id]=student
     del data[student_id]['id']
-
     save_data(data)
+    
     return "Student data saved successfully."
