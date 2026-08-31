@@ -1,4 +1,4 @@
-from fastapi import FastAPI,Path,HTTPException,Query
+from fastapi import FastAPI,Path,HTTPException,Query,Body
 import json
 
 from starlette.status import HTTP_404_NOT_FOUND
@@ -9,6 +9,10 @@ def load_data():
     with open('students.json','r') as f:
         data=json.load(f)
     return data
+def save_data(data):
+    with open('students.json','w')as f:
+        json.dump(data,f)
+
 
 @app.get("/")
 def hello():
@@ -47,3 +51,13 @@ def view_sorted_students(sorted_by:str=Query(...,description="Sort on the basis 
     sorted_data=list(data.values())
     sorted_data.sort(key=lambda x:x[sorted_by],reverse=sort_order)
     return sorted_data
+
+@app.post("/create")
+def create_student(student:dict=Body()):
+    data=load_data()
+    student_id=student["id"]
+    data[student_id]=student
+    del data[student_id]['id']
+
+    save_data(data)
+    return "Student data saved successfully."
