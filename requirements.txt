@@ -6,3 +6,6 @@ uvicorn
 
 #Pydantic
 pydantic
+
+#Database
+sqlalchemy

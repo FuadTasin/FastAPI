@@ -27,4 +27,4 @@ def view_student_by_id(student_id:str=Path(...,description="Student Id of the st
     if student_id in data:
         return data[student_id]
     else:
-        return HTTPException(status_code=404,detail="Student not found.")
+        raise HTTPException(status_code=404,detail="Student not found.")

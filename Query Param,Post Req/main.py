@@ -33,7 +33,7 @@ def view_student_by_id(student_id:str=Path(...,description="Student Id of the st
     if student_id in data:
         return data[student_id]
     else:
-        return HTTPException(status_code=404,detail="Student not found.")
+        raise HTTPException(status_code=404,detail="Student not found.")
 
 @app.get("/sort")
 def view_sorted_students(sorted_by:str=Query(...,description="Sort on the basis of class,age,roll,marks"),order:str=Query('asc',description="Choose order: asc or des")):
@@ -41,10 +41,10 @@ def view_sorted_students(sorted_by:str=Query(...,description="Sort on the basis 
     valid_fields=['class','age','roll','Math marks','English marks','Science marks']
 
     if sorted_by not in valid_fields:
-        return HTTPException(status_code=404,detail=f"Invalid field,select from {valid_fields}")
+        raise HTTPException(status_code=404,detail=f"Invalid field,select from {valid_fields}")
 
     if order not in ['asc','des']:
-        return HTTPException(status_code=404,detail=f"Invalid order,select from {['asc','des']}")
+        raise HTTPException(status_code=404,detail=f"Invalid order,select from {['asc','des']}")
 
     data=load_data()
     sort_order=True if order=='des' else False
