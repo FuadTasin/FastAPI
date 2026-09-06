@@ -7,6 +7,7 @@ from database import SessionLocal
 from fastapi.responses import JSONResponse
 from tables import Users
 from passlib.context import CryptContext
+from fastapi.security import OAuth2PasswordRequestForm
 
 router=APIRouter()
 
@@ -18,6 +19,14 @@ class CreateUsers(BaseModel):
     lastname:Annotated[str,"lastname of the user"]
     password:Annotated[str,"Password of the user"]
     role:Annotated[str,"Role of the user"]
+
+def authenticate_user(username,password,db):
+    user=db.query(Users).filter(Users.username==username).first()
+    if user is  None:
+        return False
+    if bcrypt_context.verify(password,user.hash_password):
+        return True
+    return False
 
 def get_db():
     db=SessionLocal()
@@ -44,3 +53,13 @@ def create_user(db:db_dependency,new_user:CreateUsers):
     db.commit()
 
     return JSONResponse(status_code=201,content={'message':'User created successfully.'})
+
+@router.post('/login')
+def login_user(db:db_dependency,form_user:Annotated[OAuth2PasswordRequestForm,Depends()]):
+    
+    user=authenticate_user(form_user.username,form_user.password,db)
+    
+    if user==True:
+        return "Authenticated user."
+    else:
+        return "Failed Authentication."
