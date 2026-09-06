@@ -6,6 +6,8 @@ from sqlalchemy.orm import Session
 from database import engine,SessionLocal
 from pydantic import BaseModel, Field
 from fastapi.responses import JSONResponse
+from router import authentication
+
 
 app=FastAPI()
 
@@ -22,6 +24,7 @@ class UpdateTodo(BaseModel):
     completed:Optional[bool]=Field(default=None)
 
 tables.Base.metadata.create_all(bind=engine)
+app.include_router(authentication.router)
 
 def get_db():
     db=SessionLocal()
