@@ -36,10 +36,11 @@ def authenticate_user(username,password,db):
         return user
     return False
 
-def create_access_token(user_name:str,user_id:int,expire_delta:timedelta):
+def create_access_token(user_name:str,user_id:int,user_role:str,expire_delta:timedelta):
     encode={
         'sub':user_name,
         'id':user_id,
+        'role':user_role
     }
     expire=datetime.now(timezone.utc)+expire_delta
     encode.update({
@@ -53,11 +54,13 @@ def get_current_user(token:Annotated[str,Depends(OAuth2_bearer)]):
         payload=jwt.decode(token,SECRET_KEY,algorithms=[ALGORITHM])
         username:str=payload.get('sub')
         user_id:int=payload.get('id')
-        if username is None or user_id is None:
+        user_role:str=payload.get('role')
+        if username is None or user_id  or user_role is None:
             raise HTTPException(status_code=404,detail="User not found.")
         return {
             'username':username,
-            'id':id
+            'id':user_id,
+            'role':user_role
         }
     except:
         raise JWTError
@@ -95,7 +98,7 @@ def login_user(db:db_dependency,form_user:Annotated[OAuth2PasswordRequestForm,De
     
     if not user:
         return "Failed Authentication."
-    token=create_access_token(user.username,user.id,timedelta(minutes=30))
+    token=create_access_token(user.username,user.id,user.role,timedelta(minutes=30))
     return {
         'access_token':token,
         'token_type':'bearer'

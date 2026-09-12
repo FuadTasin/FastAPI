@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from database import engine,SessionLocal
 from pydantic import BaseModel, Field
 from fastapi.responses import JSONResponse
-from router import authentication
+from router import authentication,admin
 from router.authentication import get_current_user
 
 
@@ -26,6 +26,7 @@ class UpdateTodo(BaseModel):
 
 tables.Base.metadata.create_all(bind=engine)
 app.include_router(authentication.router)
+app.include_router(admin.router)
 
 def get_db():
     db=SessionLocal()
@@ -61,6 +62,7 @@ def create_todos(user:user_dependency,db:db_dependency,new_todo:Todo):
         raise HTTPException(status_code=401,detail="Failed Authentication")
 
     todo_model=Todos(**new_todo.model_dump(),owner_id=user.get('id'))
+    db.commit(todo_model)
     return JSONResponse(status_code=201,content={"message":"Todo Created Successfully"})
 
 @app.put('/update/{todo_id}')
@@ -68,7 +70,7 @@ def update_todos(user:user_dependency,db:db_dependency,todo_id:int,update_todo:U
     if user is None:
         raise HTTPException(status_code=401,detail="Failed Authentication")
 
-    todo=db.query(Todos).filter(Todos.owner_id==user.get('owner_id')).filter(Todos.id==todo_id).first()
+    todo=db.query(Todos).filter(Todos.owner_id==user.get('id')).filter(Todos.id==todo_id).first()
     if todo is  None:
         raise HTTPException(status_code=404,detail="Todo not found.")
     
@@ -85,11 +87,11 @@ def delete_todos(user:user_dependency,db:db_dependency,todo_id:int):
     if user is None:
         raise HTTPException(status_code=401,detail="Failed Authentication")
 
-    todo=db.query(Todos).filter(Todos.owner_id==user.get('owner_id')).filter(Todos.id==todo_id).first()
+    todo=db.query(Todos).filter(Todos.owner_id==user.get('id')).filter(Todos.id==todo_id).first()
     if todo is  None:
         raise HTTPException(status_code=404,detail="Todo not found.")
     
-    db.query(Todos).filter(Todos.owner_id==user.get('owner_id')).filter(Todos.id==todo_id).delete()
+    db.query(Todos).filter(Todos.owner_id==user.get('id')).filter(Todos.id==todo_id).delete()
     db.commit()
 
     return JSONResponse(status_code=200,content={'message':'Todo deleted successfully.'}) 
