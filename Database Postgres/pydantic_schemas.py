@@ -7,5 +7,5 @@ class CreatePost(BaseModel):
     content:Annotated[str,...,Field(...,description="Title of the Post")]
 
 class UpdatePost(BaseModel):
-    title:Annotated[str,Optional()]
-    Content:Annotated[str,Optional()]
+    title:Optional[str]=Field(default=None)
+    Content:Optional[str]=Field(default=None)
