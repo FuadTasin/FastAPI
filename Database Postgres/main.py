@@ -7,10 +7,12 @@ from typing import Annotated,Optional
 from models import Posts
 from pydantic_schemas import CreatePost, UpdatePost
 from datetime import datetime,timezone
+from router import auth
 
 app=FastAPI()
 
 models.Base.metadata.create_all(bind=engine)
+app.include_router(auth.router)
 
 def get_db():
     db=SessionLocal()
