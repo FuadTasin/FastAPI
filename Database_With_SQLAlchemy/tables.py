@@ -1,4 +1,4 @@
-from database import Base
+from Database_With_SQLAlchemy.database import Base
 from sqlalchemy import Column, ForeignKey,Integer,String,Boolean
 
 class Todos(Base):
@@ -22,3 +22,4 @@ class Users(Base):
     hash_password=Column(String)
     is_active=Column(Boolean,default=True)
     role=Column(String)
+    phone_number=Column(String)
