@@ -36,7 +36,7 @@ def read_all_todos(user:user_dependency,db:db_dependency):
 
 @router.delete('/admin/remove/{todo_id}')
 def delete_todos_by_admin(user:user_dependency,db:db_dependency,todo_id:int):
-    if user is None or user.get('role')=='admin':
+    if user is None or user.get('role')!='admin':
         raise HTTPException(status_code=401,detail="Failed Authentication")
 
     todo=db.query(Todos).filter(Todos.id==todo_id).first()

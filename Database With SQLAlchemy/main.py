@@ -1,6 +1,6 @@
 from fastapi import FastAPI,Depends, HTTPException
 import tables
-from tables import Todos
+from tables import Todos,Users
 from typing import Annotated,Optional
 from sqlalchemy.orm import Session
 from database import engine,SessionLocal
@@ -42,14 +42,14 @@ user_dependency=Annotated[dict,Depends(get_current_user)]
 def read_todos(user:user_dependency,db:db_dependency):
     if user is None:
         raise HTTPException(status_code=401,detail="Failed Authentication")
-    return db.query(Todos).filter(Todos.owner_id==user.get('owner_id'))
+    return db.query(Todos).filter(Todos.owner_id==user.get('id')).all()
 
 @app.get('/todos/{todo_id}')
 def read_specific_todos(user:user_dependency,db:db_dependency,todo_id:int):
     if user is None:
         raise HTTPException(status_code=401,detail="Failed Authentication")
 
-    specific_todo=db.query(Todos).filter(Todos.owner_id==user.get('owner_id')).filter(Todos.id==todo_id).first()
+    specific_todo=db.query(Todos).filter(Todos.owner_id==user.get('id')).filter(Todos.id==todo_id).first()
 
     if (specific_todo):
         return specific_todo
@@ -62,7 +62,8 @@ def create_todos(user:user_dependency,db:db_dependency,new_todo:Todo):
         raise HTTPException(status_code=401,detail="Failed Authentication")
 
     todo_model=Todos(**new_todo.model_dump(),owner_id=user.get('id'))
-    db.commit(todo_model)
+    db.add(todo_model)
+    db.commit()
     return JSONResponse(status_code=201,content={"message":"Todo Created Successfully"})
 
 @app.put('/update/{todo_id}')
@@ -95,3 +96,9 @@ def delete_todos(user:user_dependency,db:db_dependency,todo_id:int):
     db.commit()
 
     return JSONResponse(status_code=200,content={'message':'Todo deleted successfully.'}) 
+
+@app.get("/view/profile")
+def view_profile(user:user_dependency,db:db_dependency):
+    if user is None:
+        raise HTTPException(status_code=401,detail="Failed Authentication") 
+    return db.query(Users).filter(Users.id==user.get('id')).first()
